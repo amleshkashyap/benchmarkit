@@ -3,4 +3,5 @@ Rails.application.routes.draw do
   root "execute_scripts#index"
   get 'resultti', to: 'execute_scripts#result_time'
   get 'resultsc', to: 'execute_scripts#result_script'
+  get 'resultred', to: 'execute_scripts#result_redis'
 end

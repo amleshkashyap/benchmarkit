@@ -20,4 +20,10 @@ class ExecuteScriptsController < ApplicationController
     p @ex_res
   end
 
+  def result_redis
+    Util.redis_add_to_hash("redis_key", "fruit", "apple")
+    Util.redis_add_to_hash("redis_key", "better_fruit", "banana")
+    @ex_res = Util.redis_get_all_from_hash("redis_key") ? Util.redis_get_all_from_hash("redis_key") : {}
+  end
+
 end
