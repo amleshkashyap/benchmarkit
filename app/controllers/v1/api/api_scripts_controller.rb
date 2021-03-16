@@ -6,14 +6,12 @@ class V1::Api::ApiScriptsController < ApplicationController
 
     respond_to do |format|
       if @script.save
-        RunScriptWorker.perform_in(50.seconds, @script.id)
+        RunScriptWorker.perform_in(5.seconds, @script.id)
         puts "Script was successfully created"
-        format.html { }
-        format.json { }
+        format.json { render :json => "Uploaded successfully" }
       else
         puts "Uprocessable Entity"
-        format.html {}
-        format.json {}
+        format.json { render :json => "Upload failed" }
       end
     end
   end
@@ -27,6 +25,16 @@ class V1::Api::ApiScriptsController < ApplicationController
       @script = nil
     end
 
+    if !@script.nil?
+      @script.textfile.open do |file|
+        File.readlines(file).each do |line|
+          puts line
+        end
+      end
+    end
+#    File.readlines(@script.textfile).each do |line|
+#      puts line
+#    end
     respond_to do |format|
       if !@script.nil?
         format.json { render :json => @script.status }
@@ -38,7 +46,7 @@ class V1::Api::ApiScriptsController < ApplicationController
 
   private
     def script_upload_params
-      params.permit(:name, :description, :language, :text).merge!(user_id: 3).merge!(status: 'uploaded').merge!(history: {})
+      params.permit(:name, :description, :language, :textfile).merge!(user_id: 3).merge!(status: 'uploaded').merge!(history: "")
     end
     def script_check_params
       params.permit(:id, :name)
