@@ -2,11 +2,11 @@ class V1::Api::ApiScriptsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def create
-    @script = Script.new(script_upload_params).merge!(user_id: 4, status: 'uploaded', history: {})
+    @script = Script.new(script_upload_params)
 
     respond_to do |format|
       if @script.save
-        RunScriptWorker.perform_in(50.seconds, @script)
+        RunScriptWorker.perform_in(50.seconds, @script.id)
         puts "Script was successfully created"
         format.html { }
         format.json { }
@@ -38,7 +38,7 @@ class V1::Api::ApiScriptsController < ApplicationController
 
   private
     def script_upload_params
-      params.permit(:name, :description, :language, :text)
+      params.permit(:name, :description, :language, :text).merge!(user_id: 3).merge!(status: 'uploaded').merge!(history: {})
     end
     def script_check_params
       params.permit(:id, :name)

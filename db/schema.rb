@@ -40,8 +40,17 @@ ActiveRecord::Schema.define(version: 2021_03_16_055604) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
-# Could not dump table "scripts" because of following StandardError
-#   Unknown type '' for column 'history'
+  create_table "scripts", force: :cascade do |t|
+    t.string "name"
+    t.string "description"
+    t.string "language"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "user_id"
+    t.string "status"
+    t.string "history"
+    t.index ["user_id"], name: "index_scripts_on_user_id"
+  end
 
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
