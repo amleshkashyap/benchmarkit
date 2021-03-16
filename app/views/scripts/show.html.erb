@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @script.name %>
+</p>
+
+<p>
+  <strong>Description:</strong>
+  <%= @script.description %>
+</p>
+
+<p>
+  <strong>Language:</strong>
+  <%= @script.language %>
+</p>
+
+<%= link_to 'Edit', edit_script_path(@script) %> |
+<%= link_to 'Back', scripts_path %>
