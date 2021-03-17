@@ -1,7 +1,7 @@
 class V1::Api::ApiScriptsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
-  def create
+  def create_script
     @script = Script.new(script_upload_params)
 
     respond_to do |format|
@@ -16,7 +16,7 @@ class V1::Api::ApiScriptsController < ApplicationController
     end
   end
 
-  def check
+  def check_script
     if !params[:id].nil?
       @script = Script.find_by_id(params[:id])
     elsif !params[:name].nil?
@@ -32,9 +32,7 @@ class V1::Api::ApiScriptsController < ApplicationController
         end
       end
     end
-#    File.readlines(@script.textfile).each do |line|
-#      puts line
-#    end
+
     respond_to do |format|
       if !@script.nil?
         format.json { render :json => @script.status }
@@ -42,6 +40,34 @@ class V1::Api::ApiScriptsController < ApplicationController
         format.json { render :json => "Not found" }
       end
     end
+  end
+
+  # this is in case of sanitization, validation and execution errors - will identify the last executed version if exists (both success/error)
+  # priority order for identification is sanitization error, validation error, execution error, execution success
+  def resubmit_script
+    @script = Script.find_by_id(params[:id])
+#    @metrics = Metric.find(:script_id => @script.id)
+#    if !@metrics.nil?
+#      @metric = @metrics.last
+#    end
+  end
+
+  # this reruns the most recent successfully executed version of the script
+  # simply use the currently attached file
+  def rerun_script
+    @script = Script.find_by_id(params[:id])
+    @metric = Metric.new(:code_id => @script.latest_code_id, :execute_from => "attached_file")
+    @metric.save
+    ExecuteScriptWorker.perform_in(10.seconds, @metric.id)
+    @script["status"] = "rerun"
+    @script.save
+    respond_to do |format|
+      format.json = { }
+    end
+  end
+
+  # this allows rerunning a specific executed version of the script - later
+  def rerun_code
   end
 
   private

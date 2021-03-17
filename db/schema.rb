@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_16_055604) do
+ActiveRecord::Schema.define(version: 2021_03_17_174902) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -40,6 +40,34 @@ ActiveRecord::Schema.define(version: 2021_03_16_055604) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "codes", force: :cascade do |t|
+    t.string "status"
+    t.string "description"
+    t.string "snippet"
+    t.integer "lines"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "script_id", null: false
+    t.index ["script_id"], name: "index_codes_on_script_id"
+  end
+
+  create_table "metrics", force: :cascade do |t|
+    t.string "status"
+    t.string "description"
+    t.integer "iterations"
+    t.float "user_time"
+    t.float "system_time"
+    t.float "total_time"
+    t.float "real_time"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "script_id", null: false
+    t.integer "code_id", null: false
+    t.string "execute_from"
+    t.index ["code_id"], name: "index_metrics_on_code_id"
+    t.index ["script_id"], name: "index_metrics_on_script_id"
+  end
+
   create_table "scripts", force: :cascade do |t|
     t.string "name"
     t.string "description"
@@ -49,6 +77,7 @@ ActiveRecord::Schema.define(version: 2021_03_16_055604) do
     t.integer "user_id"
     t.string "status"
     t.string "history"
+    t.integer "latest_code_id"
     t.index ["user_id"], name: "index_scripts_on_user_id"
   end
 
@@ -76,5 +105,8 @@ ActiveRecord::Schema.define(version: 2021_03_16_055604) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "codes", "scripts"
+  add_foreign_key "metrics", "codes"
+  add_foreign_key "metrics", "scripts"
   add_foreign_key "scripts", "users"
 end

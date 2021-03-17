@@ -1,4 +1,4 @@
-class RunScriptWorker
+class ExecuteScriptWorker
   include Sidekiq::Worker
   sidekiq_options :queue => :high
   sidekiq_options :retries => 3
@@ -7,6 +7,7 @@ class RunScriptWorker
     @script = Script.find_by_id(id)
     @script["status"] = "enqueued"
     if @script.save
+      
 #      puts "File is " + @script.textfile
       @script.textfile.open do |file|
         load file

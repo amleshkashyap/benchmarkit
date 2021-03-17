@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  status: MyString
+  description: MyString
+  iterations: 
+  user_time: 
+  system_time: 
+  total_time: 
+  real_time: 
+
+two:
+  status: MyString
+  description: MyString
+  iterations: 
+  user_time: 
+  system_time: 
+  total_time: 
+  real_time: 
