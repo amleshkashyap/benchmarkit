@@ -4,48 +4,36 @@ class SanitizeScriptWorker
   sidekiq_options :retries => 3
 
   def perform(id, result)
-    script = Script.find_by_id(id)
-    script["status"] = "validating"
-    if script.save
-      snippet = script.extract_code
-      code = Code.new(:snippet => snippet, :status => "stored")
-      if code.save
-        if code.sanitize_snippet
-          code["status"] = "sanitized" if code.sanitize_snippet
-          if code.save
-            if code.validate_snippet(result)
-              code["status"] = "validated"
-              code.save
-              script["status"] = "validated"
-              if script.save
-                ExecuteScriptWorker.perform_in(10.seconds, script.id)
-              else
-                raise RuntimeError
-              end
-            else
-              code["status"] = "error"
-              code["description"] = "Validation failed"
-              code.save
-              script["status"] = "error"
-              script["description"] = "Validation failed"
-              script.save
-            end
-          else
-            raise RuntimeError
-          end
+    @script = Script.find_by_id(id)
+    script_status = "validating"
+    script_description = "Successfully Updated The Status"
+    snippet = script.extract_code
+    @code = Code.new(:snippet => snippet, :status => "stored")
+    if @code.save
+      code_status = "stored"
+      code_description = "Successfully Updated The Status"
+      if @code.sanitize_snippet
+        code_status = "sanitized"
+        if @code.validate_snippet
+          code_status = "validated"
+          ExecuteScriptWorker.perform_in(10.seconds, @script.id)
         else
-          code["status"] = "error"
-          code["description"] = "Sanitization failed"
-          code.save
-          script["status"] = "error"
-          script["description"] = "Sanitization failed, fix and upload the script again"
-          script.save
+          code_status = "error"
+          code_description = "Snippet Validation Failed"
         end
       else
-        raise RuntimeError
+        code_status = "error"
+        code_description = "Snippet Sanitization Failed"
       end
+      @code["status"] = code_status
+      @code["description"] = code_description
+      @code.save
     else
-      raise RuntimeError
+      script_status = "error"
+      script_description = "Failed to store the given code"
     end
+    @script["status"] = script_status
+    @script["description"] = script_description
+    @script.save
   end
 end
