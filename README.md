@@ -1,4 +1,28 @@
 # Benchmark Scripts/Snippets
+  * Summary - 
+    1. Submit a script for execution and benchmarking
+    2. If the script fails some checks, it can be resubmitted multiple number of times
+    3. If the script throws an error at runtime, it can be resubmitted multiple number of times
+    4. If the script succeeds in checks and execution even once, then the script can't be changed.
+    5. Successfully executed script can be rerun any number of times though, with different number of iteration parameters
+    6. There's a provision to run a successfully executed script out of the context of script, just as an independent piece of code without affecting script's state.
+
+  * Models - 
+    1. Script - stores the status and description, the script file, the latest execution details (if it executed ever), and the latest code details.
+    2. Code - status, size, LOC of all the uploaded scripts, even if they fail checks, are stored. A code has a script\_id.
+    3. Metric - details of all the executions performed on a script, or a code - metric can be run via a file (when it must have script\_id) and via the stored code as well (when it has a static script\_id) - it always has some code\_id which tells the exact code which it ran upon. Stores iterations, user/system/real/total time of execution of the given code.
+
+  * Workflow - 
+    1. Submit a script for execution - POST /scripts
+    2. The script will be stored, and its code will be independently stored. Checks run on the code via background job, and if successful, metric is created which will be updated based on the execution results.
+    3. If the checks fail on the code, the status of script is updated to error. Similarly, if checks pass, but execution fails, status of the script will be updated to error.
+    4. Status of a script can be checked - GET /scripts
+    5. If status is error, then we can reupload the modified script with changed details - PUT /scripts
+    6. If status is executed, then we can only rerun the locked script, with different iterations though - GET /scripts/rerun
+    7. It is possible to execute a specific version of code which passed the checks but failed execution due to non-code errors (how? is it even possible?) - in that case, we can directly submit such codes for execution, and will be provided the corresponding metric ID created for the execution - GET /scripts/reruncode
+    8. A metric can be directly queried as well, so it can handle the calls in (4) and (7) - GET /metric
+
+  * Check lib/scripts/benchmarkit\_collection for the POSTMAN collection. Use the file lib/scripts/moreclasses.rb as the :textfile parameter.
   * Check lib/scripts for some default scripts
   * app/controller/execute\_scripts - executes some default scripts/snippets
 
