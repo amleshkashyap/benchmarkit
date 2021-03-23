@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 
   devise_for :users
   resources :scripts
+
   namespace :v1 do
     namespace :api do
       post '/scripts' => 'api_scripts#create_script'

@@ -23,6 +23,7 @@ gem 'devise'
 gem 'redis', '~> 4.0'
 gem 'redis-namespace'
 gem 'sidekiq'
+gem 'aasm'
 # Use Active Model has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
