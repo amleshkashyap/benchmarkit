@@ -43,6 +43,8 @@ def measure_given_snippet(snippet)
     end
   }
   puts "Measuring snippet: " + snippet, time
+  timeArr = [time.utime, time.stime, time.total, time.real]
+  p timeArr
 end
 
 def execute_given_snippet(snippet)
@@ -78,6 +80,6 @@ end
 # measure_given_script("moreclasses.rb")
 # measure_given_script("/home/amlesh/projects/explore-rubyonrails/benchmarkit/lib/scripts/moreclasses.rb")
 # measure_given_snippet("Time.now.utc.to_i")
-# measure_given_snippet("100.times do; Time.now.utc; end; 100.times do; Time.now.utc.to_i; end;")
-read_and_store_script("/home/amlesh/projects/explore-rubyonrails/benchmarkit/lib/scripts/moreclasses.rb")
-read_and_store_script("moreclasses.rb")
+measure_given_snippet("100.times do; Time.now.utc; end; 100.times do; Time.now.utc.to_i; end;")
+# read_and_store_script("/home/amlesh/projects/explore-rubyonrails/benchmarkit/lib/scripts/moreclasses.rb")
+# read_and_store_script("moreclasses.rb")

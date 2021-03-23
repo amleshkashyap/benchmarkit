@@ -1,0 +1,242 @@
+{
+	"info": {
+		"_postman_id": "43b2b990-9ee4-44ef-a2f2-ac023d478bf7",
+		"name": "New Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Submit A Fresh Script For Execution",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "name",
+							"value": "MoreClasses",
+							"type": "text"
+						},
+						{
+							"key": "description",
+							"value": "Basics of method overloading",
+							"type": "text"
+						},
+						{
+							"key": "language",
+							"value": "ruby",
+							"type": "text"
+						},
+						{
+							"key": "textfile",
+							"type": "file",
+							"src": "moreclasses.rb"
+						},
+						{
+							"key": "iters",
+							"value": "1000",
+							"type": "text"
+						},
+						{
+							"key": "result",
+							"value": "true",
+							"type": "text"
+						},
+						{
+							"key": "random",
+							"value": "random",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:3000/v1/api/scripts",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"scripts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check Status of A Submitted Script",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/v1/api/scripts?id=14",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"scripts"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "14"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Resubmit Due To Failures",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "id",
+							"value": "14",
+							"type": "text"
+						},
+						{
+							"key": "iters",
+							"value": "500",
+							"type": "text"
+						},
+						{
+							"key": "result",
+							"value": "true",
+							"type": "text"
+						},
+						{
+							"key": "textfile",
+							"type": "file",
+							"src": "moreclasses.rb"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:3000/v1/api/scripts",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"scripts"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "14",
+							"disabled": true
+						},
+						{
+							"key": "result",
+							"value": "true",
+							"disabled": true
+						},
+						{
+							"key": "iters",
+							"value": "500",
+							"disabled": true
+						},
+						{
+							"key": "textfile",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Rerun The Script, Supply Iterations",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/v1/api/scripts/rerun?id=14",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"scripts",
+						"rerun"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "14"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Rerun A Code, Not Script",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/v1/api/scripts/reruncode?id=9",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"scripts",
+						"reruncode"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "9"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Specific Metric Details",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/v1/api/metric?id=3",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"metric"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

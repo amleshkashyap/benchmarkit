@@ -3,37 +3,35 @@ class SanitizeScriptWorker
   sidekiq_options :queue => :high
   sidekiq_options :retries => 3
 
-  def perform(id, result)
+  def perform(id, iterations, result)
     @script = Script.find_by_id(id)
-    script_status = "validating"
-    script_description = "Successfully Updated The Status"
-    snippet = script.extract_code
-    @code = Code.new(:snippet => snippet, :status => "stored")
-    if @code.save
-      code_status = "stored"
-      code_description = "Successfully Updated The Status"
-      if @code.sanitize_snippet
-        code_status = "sanitized"
-        if @code.validate_snippet
-          code_status = "validated"
-          ExecuteScriptWorker.perform_in(10.seconds, @script.id)
-        else
-          code_status = "error"
-          code_description = "Snippet Validation Failed"
-        end
-      else
-        code_status = "error"
-        code_description = "Snippet Sanitization Failed"
-      end
-      @code["status"] = code_status
-      @code["description"] = code_description
-      @code.save
-    else
-      script_status = "error"
-      script_description = "Failed to store the given code"
-    end
-    @script["status"] = script_status
-    @script["description"] = script_description
+    @script.status = "validating"
+    @script.description = "Performing Checks On The Submitted Code, Please Check After Sometime"
     @script.save
+    snippet = @script.extract_code
+    @code = Code.new(:snippet => snippet, :status => "stored", :script_id => @script.id)
+    @code.save
+    if @code.sanitize_snippet
+      result = true if result == 'true'
+      result = false if result == 'false'
+      if @code.validate_snippet(result)
+        @metric = Metric.new(:code_id => @code.id, :script_id => @script.id, :execute_from => "attached_file", :iterations => iterations, :status => 'enqueued')
+        @metric.save
+        @script.latest_code_id = @code.id
+        @script.latest_metric_id = @metric.id
+        @script.status = 'enqueued'
+        @script.description = "Successfully Enqueued For Execution, Check Metrics After Sometime"
+	@script.save
+        ExecuteScriptWorker.perform_in(10.seconds, @metric.id)
+      else
+        @script.status = "error"
+	@script.description = "Validation Failed, Resubmit After Modifying"
+        @script.save
+      end
+    else
+      @script.status = "error"
+      @script.description = "Sanitization Failed, Resubmit After Modifying"
+      @script.save
+    end
   end
 end
