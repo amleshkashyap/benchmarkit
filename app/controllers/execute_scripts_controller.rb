@@ -1,5 +1,6 @@
 class ExecuteScriptsController < ApplicationController
 
+  before_action :authenticate_user!
   require 'benchmark'
 
   def result_script
