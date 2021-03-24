@@ -5,7 +5,7 @@ class V1::Api::ApiScriptsController < ApplicationController
 
   def create_script
     if script_upload_params
-      @script = Script.new(:name => params[:name], :summary => params[:summary], :language => params[:language], :textfile => params[:textfile], :user_id => 3, :status => 'uploaded')
+      @script = Script.new(:name => params[:name], :summary => params[:summary], :language => params[:language], :textfile => params[:textfile], :user_id => 3, :description => 'Successfully Uploaded')
     else
       respond_to do |format|
         format.json { render :json => "Invalid Parameters" }

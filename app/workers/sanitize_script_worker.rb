@@ -9,12 +9,12 @@ class SanitizeScriptWorker
       @script.update_description("Performing Checks On The Submitted Code, Please Check After Sometime")
     end
     snippet = @script.extract_code
-    @code = Code.new(:snippet => snippet, :status => "stored", :script_id => @script.id)
+    @code = Code.new(:snippet => snippet, :script_id => @script.id)
     @code.save
-    if @code.sanitize_snippet
+    if @code.sanitization
       result = true if result == 'true'
       result = false if result == 'false'
-      if @code.validate_snippet(result)
+      if @code.validation(result)
         @metric = Metric.new(:code_id => @code.id, :script_id => @script.id, :execute_from => "attached_file", :iterations => iterations, :status => 'enqueued')
         @metric.save
         jid = ExecuteScriptWorker.perform_in(60.seconds, @metric.id)
@@ -25,12 +25,12 @@ class SanitizeScriptWorker
           @script.update_description("Successfully Enqueued For Execution, Check Metrics After Sometime")
         end
       else
-        @script.failed_workflow do
+        @script.failed_validation do
           @script.update_description("Validation Failed, Resubmit After Modifying")
         end
       end
     else
-      @script.failed_workflow do
+      @script.failed_validation do
         @script.update_description("Sanitization Failed, Resubmit After Modifying")
       end
     end
