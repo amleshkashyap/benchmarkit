@@ -5,9 +5,9 @@ class SanitizeScriptWorker
 
   def perform(id, iterations, result)
     @script = Script.find_by_id(id)
-    @script.status = "validating"
-    @script.description = "Performing Checks On The Submitted Code, Please Check After Sometime"
-    @script.save
+    @script.validating do
+      @script.update_description("Performing Checks On The Submitted Code, Please Check After Sometime")
+    end
     snippet = @script.extract_code
     @code = Code.new(:snippet => snippet, :status => "stored", :script_id => @script.id)
     @code.save
@@ -20,21 +20,19 @@ class SanitizeScriptWorker
         jid = ExecuteScriptWorker.perform_in(60.seconds, @metric.id)
         @metric.jid = jid
         @metric.save
-        @script.latest_code_id = @code.id
-        @script.latest_metric_id = @metric.id
-        @script.status = 'enqueued'
-        @script.description = "Successfully Enqueued For Execution, Check Metrics After Sometime"
-        @script.last_jid = jid
-	@script.save
+        @script.update_execution_details(@code.id, @metric.id, jid)
+        @script.validated do
+          @script.update_description("Successfully Enqueued For Execution, Check Metrics After Sometime")
+        end
       else
-        @script.status = "error"
-	@script.description = "Validation Failed, Resubmit After Modifying"
-        @script.save
+        @script.failed_workflow do
+          @script.update_description("Validation Failed, Resubmit After Modifying")
+        end
       end
     else
-      @script.status = "error"
-      @script.description = "Sanitization Failed, Resubmit After Modifying"
-      @script.save
+      @script.failed_workflow do
+        @script.update_description("Sanitization Failed, Resubmit After Modifying")
+      end
     end
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_24_075213) do
+ActiveRecord::Schema.define(version: 2021_03_24_203923) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -80,6 +80,7 @@ ActiveRecord::Schema.define(version: 2021_03_24_075213) do
     t.integer "latest_code_id"
     t.integer "latest_metric_id"
     t.string "last_jid"
+    t.string "summary"
     t.index ["user_id"], name: "index_scripts_on_user_id"
   end
 

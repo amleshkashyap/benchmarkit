@@ -5,7 +5,7 @@ class V1::Api::ApiScriptsController < ApplicationController
 
   def create_script
     if script_upload_params
-      @script = Script.new(:name => params[:name], :description => params[:description], :language => params[:language], :textfile => params[:textfile], :user_id => 3, :status => 'uploaded')
+      @script = Script.new(:name => params[:name], :summary => params[:summary], :language => params[:language], :textfile => params[:textfile], :user_id => 3, :status => 'uploaded')
     else
       respond_to do |format|
         format.json { render :json => "Invalid Parameters" }
@@ -81,8 +81,9 @@ class V1::Api::ApiScriptsController < ApplicationController
       user_result = params[:result] || nil
       # add validations for user results, ie, integer, boolean, string only
       user_iterations = params[:iters] || DEFAULT_ITERATIONS
-      @script.status = "resubmit_uploaded"
-      @script.description = "Uploaded New File Successfully"
+      @script.resubmitted do
+        @script.update_description("Uploaded New File Successfully")
+      end
       if @script.save
 	jid = SanitizeScriptWorker.perform_in(30.seconds, @script.id, user_iterations, user_result)
         @script.last_jid = jid
@@ -126,7 +127,7 @@ class V1::Api::ApiScriptsController < ApplicationController
     jid = ExecuteScriptWorker.perform_in(60.seconds, @metric.id)
     @metric.jid = jid
     @metric.save
-    @script.status = "rerun_enqueued"
+    @script.rerun
     @script.latest_metric_id = @metric.id
     @script.last_jid = jid
     if @script.save
@@ -198,7 +199,7 @@ class V1::Api::ApiScriptsController < ApplicationController
 
   private
     def script_upload_params
-      params.permit(:name, :description, :language, :textfile, :iters, :result)
+      params.permit(:name, :details, :language, :textfile, :iters, :result)
     end
     def script_check_params
       params.permit(:id, :name)

@@ -1,4 +1,5 @@
 class Script < ApplicationRecord
+  include AASM
 
   VALID_STATUSES = ['uploaded', 'validating', 'enqueued', 'executed', 'resubmit_uploaded', 'rerun_enqueued', 'error', 'invalid']
 
@@ -7,6 +8,45 @@ class Script < ApplicationRecord
   has_many :codes
 
   validates :status, inclusion: { in: VALID_STATUSES }
+
+  aasm column: 'status', whiny_transitions: false do
+    state :uploaded, initial: true
+    state :validating
+    state :enqueued
+    state :executed
+    state :resubmit_uploaded
+    state :rerun_enqueued
+    state :error
+    state :invalid
+
+    event :validating do
+      transitions from: [:uploaded, :resubmit_uploaded], to: :validating
+    end
+
+    event :validated do
+      transitions from: [:validating], to: :enqueued
+    end
+
+    event :executed do
+      transitions from: [:enqueued, :rerun_enqueued], to: :executed
+    end
+
+    event :resubmitted do
+      transitions from: [:error], to: :resubmit_uploaded
+    end
+
+    event :rerun do
+      transitions from: [:executed], to: :rerun_enqueued
+    end
+
+    event :failed_validation do
+      transitions from: [:validating], to: :error
+    end
+
+    event :failed_execution do
+      transitions from: [:enqueued, :rerun_enqueued], to: :error
+    end
+  end
 
   def extract_code
     snippet = ""
@@ -22,7 +62,21 @@ class Script < ApplicationRecord
     return snippet
   end
 
-  def update_status
+  def update_description(message)
+    self.description = message
+    self.save
+  end
+
+  def update_execution_details(code_id, metric_id, job_id)
+    self.latest_code_id = code_id
+    self.latest_metric_id = metric_id
+    self.save
+    self.update_sidekiq_job_id(job_id)
+  end
+
+  def update_sidekiq_job_id(job_id)
+    self.last_jid = job_id
+    self.save
   end
 
   def get_latest_execution_values
