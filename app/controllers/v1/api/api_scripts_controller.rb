@@ -1,4 +1,5 @@
 class V1::Api::ApiScriptsController < ApplicationController
+  before_action :authenticate_user!
   skip_before_action :verify_authenticity_token
   DEFAULT_ITERATIONS = 1000
 
@@ -16,7 +17,9 @@ class V1::Api::ApiScriptsController < ApplicationController
     user_iterations = params[:iters] || DEFAULT_ITERATIONS
     respond_to do |format|
       if @script.save
-        SanitizeScriptWorker.perform_in(5.seconds, @script.id, user_iterations, user_result)
+        jid = SanitizeScriptWorker.perform_in(30.seconds, @script.id, user_iterations, user_result)
+        @script.last_jid = jid
+        @script.save
         puts "Script was successfully created"
 	format.json { render :json => "Uploaded successfully: " + @script.id.to_s }
       else
@@ -47,7 +50,13 @@ class V1::Api::ApiScriptsController < ApplicationController
       if @script.nil?
         format.json { render :json => "Not found" }
       elsif @script.status != "executed"
-        format.json { render :json => "status: " + @script.status + "\ndetails: " + @script.description }
+        new_obj = Util.find_in_retry_set(@script.last_jid)
+        new_obj = Util.find_in_dead_set(@script.last_jid) if new_obj.nil?
+        if new_obj.nil?
+          format.json { render :json => "status: " + @script.status + "\ndetails: " + @script.description }
+        else
+          format.json { render :json => new_obj }
+        end
       else
 	new_obj = @script.get_latest_execution_values
         format.json { render :json =>  new_obj }
@@ -75,7 +84,9 @@ class V1::Api::ApiScriptsController < ApplicationController
       @script.status = "resubmit_uploaded"
       @script.description = "Uploaded New File Successfully"
       if @script.save
-	SanitizeScriptWorker.perform_in(5.seconds, @script.id, user_iterations, user_result)
+	jid = SanitizeScriptWorker.perform_in(30.seconds, @script.id, user_iterations, user_result)
+        @script.last_jid = jid
+        @script.save
         respond_to do |format|
 	  format.json { render :json => "Uploaded Successfully" }
         end
@@ -112,9 +123,12 @@ class V1::Api::ApiScriptsController < ApplicationController
     iterations = params[:iters] || DEFAULT_ITERATIONS
     @metric = Metric.new(:code_id => @script.latest_code_id, :script_id => @script.id, :execute_from => "attached_file", :iterations => iterations, :status => 'enqueued')
     @metric.save
-    ExecuteScriptWorker.perform_in(10.seconds, @metric.id)
+    jid = ExecuteScriptWorker.perform_in(60.seconds, @metric.id)
+    @metric.jid = jid
+    @metric.save
     @script.status = "rerun_enqueued"
     @script.latest_metric_id = @metric.id
+    @script.last_jid = jid
     if @script.save
       respond_to do |format|
         format.json { render :json => "Submitted For Execution" }
@@ -142,7 +156,9 @@ class V1::Api::ApiScriptsController < ApplicationController
     iterations = params[:iters] || DEFAULT_ITERATIONS
     @metric = Metric.new(:code_id => @code.id, :script_id => 1, :execute_from => "stored_code", :iterations => iterations, :status => "enqueued")
     @metric.save
-    ExecuteScriptWorker.perform_in(10.seconds, @metric.id)
+    jid = ExecuteScriptWorker.perform_in(60.seconds, @metric.id)
+    @metric.jid = jid
+    @metric.save
     respond_to do |format|
       format.json { render :json => "Submitted For Execution, Metric ID: " + @metric.id.to_s }
     end
@@ -160,6 +176,23 @@ class V1::Api::ApiScriptsController < ApplicationController
     end
     respond_to do |format|
       format.json { render :json => response_message }
+    end
+  end
+
+  def get_sidekiq_jobs
+    set = params[:set] || 'scheduled'
+    if set == 'scheduled'
+      jobs = Util.all_sidekiq_jobs_in_scheduled_set
+    elsif set == 'retry'
+      jobs = Util.all_sidekiq_jobs_in_retry_set
+    elsif set == 'dead'
+      jobs = Util.all_sidekiq_jobs_in_dead_set
+    else
+      jobs = [{:message => "Invalid Set Provided, Possible Values - scheduled, retry and dead"}]
+    end
+
+    respond_to do |format|
+      format.json { render :json => jobs }
     end
   end
 

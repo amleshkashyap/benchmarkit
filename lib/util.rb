@@ -58,4 +58,46 @@ module Util
       self.redis.zrevrange(ss_key, 0, 0)
     end
   end
+
+  def self.all_sidekiq_jobs_in_retry_set
+    retry_set = Sidekiq::RetrySet.new
+    array = []
+    retry_set.select do |job|
+      array.push(job.item)
+    end
+    return array
+  end
+
+  def self.all_sidekiq_jobs_in_dead_set
+    dead_set = Sidekiq::DeadSet.new
+    array = []
+    dead_set.select do |job|
+      array.push(job.item)
+    end
+    return array
+  end
+
+  def self.all_sidekiq_jobs_in_scheduled_set
+    job_set = Sidekiq::ScheduledSet.new
+    array = []
+    job_set.select do |job|
+      array.push(job.item)
+    end
+    return array
+  end
+
+  def self.find_in_retry_set(jid)
+    retry_set = Sidekiq::RetrySet.new
+    job = retry_set.find_job(jid)
+    return job.item.merge!(:set => 'retry') if !job.nil?
+    return nil
+  end
+
+  def self.find_in_dead_set(jid)
+    dead_set = Sidekiq::DeadSet.new
+    job = dead_set.find_job(jid)
+    return job.item.merge!(:set => 'dead') if !job.nil?
+    return nil
+  end
+
 end

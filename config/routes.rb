@@ -12,6 +12,7 @@ Rails.application.routes.draw do
       get "/scripts/rerun" => 'api_scripts#rerun_script'
       get "/scripts/reruncode" => 'api_scripts#rerun_code'
       get "/metric" => 'api_scripts#get_metric'
+      get '/sidekiqjobs' => 'api_scripts#get_sidekiq_jobs'
     end
   end
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html

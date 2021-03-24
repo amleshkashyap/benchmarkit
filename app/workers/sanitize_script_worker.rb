@@ -1,7 +1,7 @@
 class SanitizeScriptWorker
   include Sidekiq::Worker
   sidekiq_options :queue => :high
-  sidekiq_options :retries => 3
+  sidekiq_options :retry => 5
 
   def perform(id, iterations, result)
     @script = Script.find_by_id(id)
@@ -17,12 +17,15 @@ class SanitizeScriptWorker
       if @code.validate_snippet(result)
         @metric = Metric.new(:code_id => @code.id, :script_id => @script.id, :execute_from => "attached_file", :iterations => iterations, :status => 'enqueued')
         @metric.save
+        jid = ExecuteScriptWorker.perform_in(60.seconds, @metric.id)
+        @metric.jid = jid
+        @metric.save
         @script.latest_code_id = @code.id
         @script.latest_metric_id = @metric.id
         @script.status = 'enqueued'
         @script.description = "Successfully Enqueued For Execution, Check Metrics After Sometime"
+        @script.last_jid = jid
 	@script.save
-        ExecuteScriptWorker.perform_in(10.seconds, @metric.id)
       else
         @script.status = "error"
 	@script.description = "Validation Failed, Resubmit After Modifying"
