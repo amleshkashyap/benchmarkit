@@ -8,7 +8,12 @@ class Metric < ApplicationRecord
   validates :status, inclusion: { in: VALID_STATUSES }
   validates :execute_from, inclusion: { in: VALID_SOURCES }
 
-  def update_after_execution
+  def update_description
+  end
+
+  def update_job_id(job_id)
+    self.jid = job_id
+    self.save
   end
 
   def execute_metric

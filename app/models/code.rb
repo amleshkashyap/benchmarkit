@@ -14,17 +14,20 @@ class Code < ApplicationRecord
     state :validated
     state :invalid
 
-    event :sanitization do
+    event :sanitization, :after => :update_description do
       transitions from: [:stored], to: :sanitized, guards: [:sanitize_it?, :is_sanitized_snippet?]
     end
 
-    event :validation do
+    event :validation, :after => :update_valid_with_result do
       transitions from: [:sanitized], to: :validated, guards: [:validate_it?, :is_valid_snippet?]
+    end
+
+    event :invalidate do
+      transitions from: [:sanitized], to: :invalid, guard: :validate_it?
     end
   end
 
   def sanitize_it?
-    p "Stored: " + self.stored?.to_s
     self.stored?
   end
 
@@ -32,7 +35,6 @@ class Code < ApplicationRecord
     RESTRICTED_KEYWORDS.each { |word|
       return false if self.snippet.includes(word)
     }
-    p "Sanitization Done: " + true.to_s
     return true
   end
 
@@ -48,21 +50,28 @@ class Code < ApplicationRecord
     return time
   end
 
-  def display_description
+  def update_description(message)
+    self.description = message
+    self.save
+  end
+
+  def update_valid_with_result(result)
+    if result.class.to_s == 'String'
+      self.valid_with_result = result
+      self.result_type = result.class
+    else
+      self.valid_with_result = result.to_s
+      self.result_type = result.class
+    end
+    self.save
   end
 
   def validate_it?
-    p "Sanitized: " + self.sanitized?.to_s
     self.sanitized?
   end
 
   def is_valid_snippet?(result)
     ex = instance_eval self.snippet
-    puts "**VALIDATION STARTS **"
-    puts ex
-    puts result
-    puts "** VALIDATION END **"
-    puts "Validation Results: " + (ex == result).to_s
     return (ex == result)
   end
 

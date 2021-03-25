@@ -1,7 +1,7 @@
 class Script < ApplicationRecord
   include AASM
 
-  VALID_STATUSES = ['uploaded', 'validating', 'enqueued', 'executed', 'resubmit_uploaded', 'rerun_enqueued', 'error', 'invalid']
+  VALID_STATUSES = ['uploaded', 'validating', 'revalidating', 'enqueued', 'executed', 'resubmit_uploaded', 'rerun_enqueued', 'error', 'invalid']
 
   has_one_attached :textfile
   has_many :metrics
@@ -12,6 +12,7 @@ class Script < ApplicationRecord
   aasm column: 'status', whiny_transitions: false do
     state :uploaded, initial: true
     state :validating
+    state :revalidating
     state :enqueued
     state :executed
     state :resubmit_uploaded
@@ -19,8 +20,10 @@ class Script < ApplicationRecord
     state :error
     state :invalid
 
+    after_all_transitions :update_description
+
     event :validating do
-      transitions from: [:uploaded, :resubmit_uploaded], to: :validating
+      transitions from: [:uploaded, :resubmit_uploaded, :revalidating], to: :validating
     end
 
     event :validated do
@@ -35,6 +38,10 @@ class Script < ApplicationRecord
       transitions from: [:error], to: :resubmit_uploaded
     end
 
+    event :revalidating do
+      transitions from: [:error], to: :revalidating
+    end
+
     event :rerun do
       transitions from: [:executed], to: :rerun_enqueued
     end
@@ -45,6 +52,10 @@ class Script < ApplicationRecord
 
     event :failed_execution do
       transitions from: [:enqueued, :rerun_enqueued], to: :error
+    end
+
+    event :invalidate do
+      transitions from: [:error], to: :invalid
     end
   end
 
@@ -67,10 +78,13 @@ class Script < ApplicationRecord
     self.save
   end
 
-  def update_execution_details(code_id, metric_id, job_id)
+  def update_latest_code(code_id, job_id)
     self.latest_code_id = code_id
+    self.update_sidekiq_job_id(job_id)
+  end
+
+  def update_latest_metric(metric_id, job_id)
     self.latest_metric_id = metric_id
-    self.save
     self.update_sidekiq_job_id(job_id)
   end
 

@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       put "/scripts" => 'api_scripts#resubmit_script'
       get "/scripts/rerun" => 'api_scripts#rerun_script'
       get "/scripts/reruncode" => 'api_scripts#rerun_code'
+      get '/scripts/revalidate' => 'api_scripts#revalidate_script'
       get "/metric" => 'api_scripts#get_metric'
       get '/sidekiqjobs' => 'api_scripts#get_sidekiq_jobs'
     end

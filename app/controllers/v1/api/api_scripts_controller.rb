@@ -8,7 +8,7 @@ class V1::Api::ApiScriptsController < ApplicationController
       @script = Script.new(:name => params[:name], :summary => params[:summary], :language => params[:language], :textfile => params[:textfile], :user_id => 3, :description => 'Successfully Uploaded')
     else
       respond_to do |format|
-        format.json { render :json => "Invalid Parameters" }
+        format.json { render :json => "Invalid Parameters" and return }
       end
     end
 
@@ -70,7 +70,7 @@ class V1::Api::ApiScriptsController < ApplicationController
     @script = Script.find_by_id(params[:id])
     if @script.nil?
       respond_to do |format|
-        format.json { render :json => "Not found" }
+        format.json { render :json => "Not found" and return }
       end
     end
 
@@ -81,13 +81,10 @@ class V1::Api::ApiScriptsController < ApplicationController
       user_result = params[:result] || nil
       # add validations for user results, ie, integer, boolean, string only
       user_iterations = params[:iters] || DEFAULT_ITERATIONS
-      @script.resubmitted! do
-        @script.update_description("Uploaded New File Successfully")
-      end
+      @script.resubmitted! "Uploaded New File Successfully"
       if @script.save
 	jid = SanitizeScriptWorker.perform_in(30.seconds, @script.id, user_iterations, user_result)
-        @script.last_jid = jid
-        @script.save
+        @script.update_sidekiq_job_id(jid)
         respond_to do |format|
 	  format.json { render :json => "Uploaded Successfully" }
         end
@@ -99,7 +96,7 @@ class V1::Api::ApiScriptsController < ApplicationController
     else
       # don't allow resubmitting the script if it worked successfully - 
       respond_to do |format|
-        format.json { render :json => "This Script Has Executed Successfully And Can't Be Modified, Try Rerunning" }
+        format.json { render :json => "This Script Has Either Executed Successfully Or Is Being Validated And Can't Be Modified, Please Check Status" }
       end
     end
   end
@@ -111,13 +108,13 @@ class V1::Api::ApiScriptsController < ApplicationController
 
     if @script.nil?
       respond_to do |format|
-        format.json { render :json => "Script Not Found" }
+        format.json { render :json => "Script Not Found" and return }
       end
     end
 
     if @script.status != 'executed'
       respond_to do |format|
-        format.json { render :json => "Can't Execute This Script, Please Resubmit" }
+        format.json { render :json => "Can't Execute This Script, Please Rerun" and return }
       end
     end
 
@@ -125,32 +122,65 @@ class V1::Api::ApiScriptsController < ApplicationController
     @metric = Metric.new(:code_id => @script.latest_code_id, :script_id => @script.id, :execute_from => "attached_file", :iterations => iterations, :status => 'enqueued')
     @metric.save
     jid = ExecuteScriptWorker.perform_in(60.seconds, @metric.id)
-    @metric.jid = jid
-    @metric.save
-    @script.rerun
-    @script.latest_metric_id = @metric.id
-    @script.last_jid = jid
-    if @script.save
+    @metric.update_job_id(jid)
+    @script.rerun! "Enqueued For Rerun"
+    @script.update_latest_metric(@metric.id, jid)
+    respond_to do |format|
+      format.json { render :json => "Submitted For Execution" }
+    end
+  end
+
+  def revalidate_script
+    @script = Script.find_by_id(params[:id])
+
+    if @script.nil? || params[:result].nil?
       respond_to do |format|
-        format.json { render :json => "Submitted For Execution" }
+        format.json { render :json => "Script Not Found, Or Result Not Provided" and return}
       end
-    else
+    end
+
+    if (@script.status != 'error' || @script.latest_code_id.nil?)
       respond_to do |format|
-        format.json { render :json => "Submitted for Execution, Error in Updating Status" }
+        format.json { render :json => "Can't Submit This Script For Validation, Please Check Status" and return }
       end
+    end
+
+    @code = Code.find_by_id(@script.latest_code_id)
+
+    if @code.nil?
+      respond_to do |format|
+        format.json { render :json => "No Code Found Associated With The Script, Please Check Status" and return }
+      end
+    end
+
+    if @code.status != 'sanitized'
+      respond_to do |format|
+        format.json { render :json => "The Code Associated With The Script Isn't Sanitized, Or Validated Already, Please Check Status Or Resubmit" and return }
+      end
+    end
+
+    user_result = params[:result]
+    user_iterations = params[:iters] || DEFAULT_ITERATIONS
+
+    jid = SanitizeScriptWorker.perform_in(30.seconds, @script.id, user_iterations, user_result, true)
+    @script.update_sidekiq_job_id(jid)
+    @script.revalidating! "Script Is Being Revalidated"
+
+    respond_to do |format|
+        format.json { render :json => "Submitted For Revalidation" }
     end
   end
 
   # this allows rerunning a specific executed version of the script - later
   def rerun_code
-	  @code = Code.find_by_id(params[:id])
+    @code = Code.find_by_id(params[:id])
     if @code.nil?
       respond_to do |format|
-        format.json { render :json => "Code Not Found" }
+        format.json { render :json => "Code Not Found" and return }
       end
     elsif @code.status != "validated"
       respond_to do |format|
-        format.json { render :json => "This Code Is Not Suitable For Execution" }
+        format.json { render :json => "This Code Is Not Suitable For Execution" and return }
       end
     end
 
@@ -158,8 +188,7 @@ class V1::Api::ApiScriptsController < ApplicationController
     @metric = Metric.new(:code_id => @code.id, :script_id => 1, :execute_from => "stored_code", :iterations => iterations, :status => "enqueued")
     @metric.save
     jid = ExecuteScriptWorker.perform_in(60.seconds, @metric.id)
-    @metric.jid = jid
-    @metric.save
+    @metric.update_job_id(jid)
     respond_to do |format|
       format.json { render :json => "Submitted For Execution, Metric ID: " + @metric.id.to_s }
     end

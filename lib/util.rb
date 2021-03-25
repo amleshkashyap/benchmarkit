@@ -100,4 +100,9 @@ module Util
     return nil
   end
 
+  def self.cleanup_arguments(result)
+    return true if result == 'true'
+    return false if result == 'false'
+  end
+
 end

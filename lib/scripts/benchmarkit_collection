@@ -19,7 +19,7 @@
 							"type": "text"
 						},
 						{
-							"key": "description",
+							"key": "summary",
 							"value": "Basics of method overloading",
 							"type": "text"
 						},
@@ -40,7 +40,7 @@
 						},
 						{
 							"key": "result",
-							"value": "true",
+							"value": "1",
 							"type": "text"
 						},
 						{
@@ -69,9 +69,16 @@
 			"name": "Check Status of A Submitted Script",
 			"request": {
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "__profilin=p%3Dt; rack.session=BAh7B0kiD3Nlc3Npb25faWQGOgZFVG86HVJhY2s6OlNlc3Npb246OlNlc3Npb25JZAY6D0BwdWJsaWNfaWRJIkVjNDcyYTZhNzhlNWJkMjQ3NWU0NzE4ODE5ZjgwZTc2NWI5YjIzMzBiMjliNWU0MzBlMWNiNmU3NzRhNGQyNzg2BjsARkkiCWNzcmYGOwBUSSIxRUE2bXprWHluMVJSNVRsL1hOK043N3F1djl2azZnYlpHNHlocElwT2hLbz0GOwBU--4fdbca559707f6407500b722753e13b1b5c2f76b; _benchmarkit_session=%2BaphBb53XGrw%2F20CVYlN3leZ5LKLOUPdnTrS2cmRON8orp5AePAb2D5k39pBGlN4r3C96lCU5p2fQ%2F7HTKrthoq8%2FT5vPYSRCEi52l8%2ByMGsnUYIkJjEjwy%2F4fGI3n7RCQhpap6DkzQplHcySA6b94nJ0iTAZ6FhL2puxLLhLjGhkebSL%2FBzeki10LV0LcQC64yDe8xsmIih5g6u%2BN%2FkU2kovl9i0zZEeKFHlncdbhULc%2F0dnX1OTSeuLHHiasG4I6S3AFFiuHc%2BvyybdTdS5UJ1nH1ggcbGtEW%2Fj%2FC7pfA8nIz6ZSnzqgdv3JZG7tO8eLbloq2lE5ypI%2FbocVedtnrGWV6zGQ1TI2as2cy7KOrA7Rs9j9Lttcj16w7sRPX0AqZq0QAlJtKnhZat--ukfD9Zn0G0g22%2BJD--wh%2BPDnP2foS7gTY%2FDdhM1w%3D%3D",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"url": {
-					"raw": "localhost:3000/v1/api/scripts?id=14",
+					"raw": "localhost:3000/v1/api/scripts?id=27",
 					"host": [
 						"localhost"
 					],
@@ -84,7 +91,7 @@
 					"query": [
 						{
 							"key": "id",
-							"value": "14"
+							"value": "27"
 						}
 					]
 				}
@@ -101,7 +108,7 @@
 					"formdata": [
 						{
 							"key": "id",
-							"value": "14",
+							"value": "27",
 							"type": "text"
 						},
 						{
@@ -111,7 +118,7 @@
 						},
 						{
 							"key": "result",
-							"value": "true",
+							"value": "tru",
 							"type": "text"
 						},
 						{
@@ -232,6 +239,67 @@
 						{
 							"key": "id",
 							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Revalidate The Last Submission With New Result",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/v1/api/scripts/revalidate?id=27&result=true&iters=1000",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"scripts",
+						"revalidate"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "27"
+						},
+						{
+							"key": "result",
+							"value": "true"
+						},
+						{
+							"key": "iters",
+							"value": "1000"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Sidekiq Jobs In Different Sets",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/v1/api/sidekiqjobs?set=dead",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"sidekiqjobs"
+					],
+					"query": [
+						{
+							"key": "set",
+							"value": "dead"
 						}
 					]
 				}
