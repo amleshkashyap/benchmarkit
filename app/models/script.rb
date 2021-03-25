@@ -63,12 +63,7 @@ class Script < ApplicationRecord
     snippet = ""
     snippet_array = []
     self.textfile.open do |file|
-      File.readlines(file).each do |line|
-        next if line.chomp.nil? or line.strip[0].nil?
-        next if line.split("#")[0].strip[0].nil?
-        snippet += line.chomp + ";"
-        snippet_array.push(line.chomp)
-      end
+      snippet = Util.extract_code(file)
     end
     return snippet
   end

@@ -1,4 +1,4 @@
-class V1::Api::ApiScriptsController < ApplicationController
+class V1::Api::ApiScriptsController < ApiController
   before_action :authenticate_user!
   skip_before_action :verify_authenticity_token
   DEFAULT_ITERATIONS = 1000
@@ -7,25 +7,22 @@ class V1::Api::ApiScriptsController < ApplicationController
     if script_upload_params
       @script = Script.new(:name => params[:name], :summary => params[:summary], :language => params[:language], :textfile => params[:textfile], :user_id => 3, :description => 'Successfully Uploaded')
     else
-      respond_to do |format|
-        format.json { render :json => "Invalid Parameters" and return }
-      end
+      render_404 and return
     end
 
     user_result = params[:result] || nil
     # add validations for user results, ie, integer, boolean, string only
     user_iterations = params[:iters] || DEFAULT_ITERATIONS
-    respond_to do |format|
-      if @script.save
-        jid = SanitizeScriptWorker.perform_in(30.seconds, @script.id, user_iterations, user_result)
-        @script.last_jid = jid
-        @script.save
-        puts "Script was successfully created"
-	format.json { render :json => "Uploaded successfully: " + @script.id.to_s }
-      else
-        puts "Uprocessable Entity"
-        format.json { render :json => "Upload failed" }
-      end
+
+    if @script.save
+      jid = SanitizeScriptWorker.perform_in(30.seconds, @script.id, user_iterations, user_result)
+      @script.last_jid = jid
+      @script.save
+      puts "Script was successfully created"
+      render_200("Uploaded Successfully", { :script_id => @script.id.to_s }) and return
+    else
+      puts "Uprocessable Entity"
+      render_500("Upload Failed") and return
     end
   end
 
@@ -65,13 +62,11 @@ class V1::Api::ApiScriptsController < ApplicationController
   end
 
   # this is in case of sanitization, validation and execution errors - will identify the last executed version if exists (both success/error)
-  # priority order for identification is sanitization error, validation error, execution error, execution success
   def resubmit_script
     @script = Script.find_by_id(params[:id])
+
     if @script.nil?
-      respond_to do |format|
-        format.json { render :json => "Not found" and return }
-      end
+      render_404 and return
     end
 
     status = @script.status
@@ -85,37 +80,26 @@ class V1::Api::ApiScriptsController < ApplicationController
       if @script.save
 	jid = SanitizeScriptWorker.perform_in(30.seconds, @script.id, user_iterations, user_result)
         @script.update_sidekiq_job_id(jid)
-        respond_to do |format|
-	  format.json { render :json => "Uploaded Successfully" }
-        end
+        render_200("Uploaded Successfully") and return
       else
-        respond_to do |format|
-          format.json { render :json => "Upload Failed" }
-        end
+        render_500("Upload Failed") and return
       end
     else
       # don't allow resubmitting the script if it worked successfully - 
-      respond_to do |format|
-        format.json { render :json => "This Script Has Either Executed Successfully Or Is Being Validated And Can't Be Modified, Please Check Status" }
-      end
+      render_403("This Script Has Either Executed Successfully Or Is Being Validated And Can't Be Modified, Please Check Status") and return
     end
   end
 
   # this reruns the most recent successfully executed version of the script
-  # simply use the currently attached file
   def rerun_script
     @script = Script.find_by_id(params[:id])
 
     if @script.nil?
-      respond_to do |format|
-        format.json { render :json => "Script Not Found" and return }
-      end
+      render_404 and return
     end
 
     if @script.status != 'executed'
-      respond_to do |format|
-        format.json { render :json => "Can't Execute This Script, Please Rerun" and return }
-      end
+      render_403("Can't Execute This Script, Please Rerun") and return
     end
 
     iterations = params[:iters] || DEFAULT_ITERATIONS
@@ -125,38 +109,28 @@ class V1::Api::ApiScriptsController < ApplicationController
     @metric.update_job_id(jid)
     @script.rerun! "Enqueued For Rerun"
     @script.update_latest_metric(@metric.id, jid)
-    respond_to do |format|
-      format.json { render :json => "Submitted For Execution" }
-    end
+    render_200("Submitted For Execution") and return
   end
 
   def revalidate_script
     @script = Script.find_by_id(params[:id])
 
     if @script.nil? || params[:result].nil?
-      respond_to do |format|
-        format.json { render :json => "Script Not Found, Or Result Not Provided" and return}
-      end
+      render_404("Script Not Found, Or Result Not Provided") and return
     end
 
     if (@script.status != 'error' || @script.latest_code_id.nil?)
-      respond_to do |format|
-        format.json { render :json => "Can't Submit This Script For Validation, Please Check Status" and return }
-      end
+      render_403("Can't Submit This Script For Validation, Please Check Status") and return
     end
 
     @code = Code.find_by_id(@script.latest_code_id)
 
     if @code.nil?
-      respond_to do |format|
-        format.json { render :json => "No Code Found Associated With The Script, Please Check Status" and return }
-      end
+      render_404("No Code Found Associated With The Script, Please Check Status") and return
     end
 
     if @code.status != 'sanitized'
-      respond_to do |format|
-        format.json { render :json => "The Code Associated With The Script Isn't Sanitized, Or Validated Already, Please Check Status Or Resubmit" and return }
-      end
+      render_403("The Code Associated With The Script Isn't Sanitized, Or Validated Already, Please Check Status Or Resubmit") and return
     end
 
     user_result = params[:result]
@@ -166,22 +140,16 @@ class V1::Api::ApiScriptsController < ApplicationController
     @script.update_sidekiq_job_id(jid)
     @script.revalidating! "Script Is Being Revalidated"
 
-    respond_to do |format|
-        format.json { render :json => "Submitted For Revalidation" }
-    end
+    render_200("Submitted For Revalidation") and return
   end
 
   # this allows rerunning a specific executed version of the script - later
   def rerun_code
     @code = Code.find_by_id(params[:id])
     if @code.nil?
-      respond_to do |format|
-        format.json { render :json => "Code Not Found" and return }
-      end
+      render_404 and return
     elsif @code.status != "validated"
-      respond_to do |format|
-        format.json { render :json => "This Code Is Not Suitable For Execution" and return }
-      end
+      render_403("This Code Is Not Suitable For Execution") and return
     end
 
     iterations = params[:iters] || DEFAULT_ITERATIONS
@@ -189,9 +157,7 @@ class V1::Api::ApiScriptsController < ApplicationController
     @metric.save
     jid = ExecuteScriptWorker.perform_in(60.seconds, @metric.id)
     @metric.update_job_id(jid)
-    respond_to do |format|
-      format.json { render :json => "Submitted For Execution, Metric ID: " + @metric.id.to_s }
-    end
+    render_200("Submitted For Execution", { :metric_id => @metric.id.to_s }) and return
   end
 
   def get_metric
@@ -199,13 +165,13 @@ class V1::Api::ApiScriptsController < ApplicationController
     response_message = nil
     if @metric.nil?
       response_message = "Not Found"
+      render_404 and return
     elsif @metric.status != "success"
       response_message = "Execution Failed"
+      render_500("Execution Failed") and return
     else
       response_message = @metric.get_execution_values
-    end
-    respond_to do |format|
-      format.json { render :json => response_message }
+      render_200("Success", { :results => @metric.get_execution_value }) and return
     end
   end
 
@@ -221,9 +187,7 @@ class V1::Api::ApiScriptsController < ApplicationController
       jobs = [{:message => "Invalid Set Provided, Possible Values - scheduled, retry and dead"}]
     end
 
-    respond_to do |format|
-      format.json { render :json => jobs }
-    end
+    render_200("Success", { :jobs => jobs }) and return
   end
 
   private

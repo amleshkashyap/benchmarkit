@@ -19,7 +19,7 @@ module Util
   end
 
   def self.redis_add_to_hash(hash_key, key, value)
-    return true if self.redis.hset(hash_key, key, value)
+    self.redis.hset(hash_key, key, value)
   end
 
   def self.redis_get_all_from_hash(hash_key)
@@ -30,7 +30,11 @@ module Util
     self.redis.hget(hash_key, key)
   end
 
-  def self.remove_from_hash(hash_key, keys)
+  def self.redis_remove_key_from_hash(hash_key, key)
+    self.redis.hdel(hash_key, key) if self.redis.hexists(hash_key, key)
+  end
+
+  def self.redis_remove_from_hash(hash_key, keys)
     # transactions aren't ACID compliant
     self.redis.multi do
       keys.for_each do |key|
@@ -105,4 +109,15 @@ module Util
     return false if result == 'false'
   end
 
+  def self.extract_code(file_name)
+    snippet = ""
+    snippet_array = []
+    File.readlines(file_name).each do |line|
+      next if line.chomp.nil? or line.strip[0].nil?
+      next if line.split("#")[0].strip[0].nil?
+      snippet += line.chomp + ";"
+      snippet_array.push(line.chomp)
+    end
+    return snippet
+  end
 end

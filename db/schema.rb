@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_25_081501) do
+ActiveRecord::Schema.define(version: 2021_03_25_210629) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -86,6 +86,14 @@ ActiveRecord::Schema.define(version: 2021_03_25_081501) do
     t.index ["user_id"], name: "index_scripts_on_user_id"
   end
 
+  create_table "user_objects", force: :cascade do |t|
+    t.string "status"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_user_objects_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "name", default: "", null: false
@@ -114,4 +122,5 @@ ActiveRecord::Schema.define(version: 2021_03_25_081501) do
   add_foreign_key "metrics", "codes"
   add_foreign_key "metrics", "scripts"
   add_foreign_key "scripts", "users"
+  add_foreign_key "user_objects", "users"
 end

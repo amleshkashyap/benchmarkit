@@ -33,7 +33,7 @@ class Code < ApplicationRecord
 
   def is_sanitized_snippet?
     RESTRICTED_KEYWORDS.each { |word|
-      return false if self.snippet.includes(word)
+      return false if self.snippet.include?(word)
     }
     return true
   end

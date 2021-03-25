@@ -305,6 +305,128 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Create User Object",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/v1/api/userobject?id=3",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"userobject"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List User Methods On Object",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/v1/api/usermethod?id=3",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"usermethod"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add User Method To The Object",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "id",
+							"value": "3",
+							"type": "text"
+						},
+						{
+							"key": "name",
+							"value": "first_method",
+							"type": "text"
+						},
+						{
+							"key": "textfile",
+							"type": "file",
+							"src": "moreclasses.rb"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:3000/v1/api/usermethod",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"usermethod"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Execute User Method",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/v1/api/runmethod?id=3&name=first_method",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"runmethod"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "3"
+						},
+						{
+							"key": "name",
+							"value": "first_method"
+						}
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
