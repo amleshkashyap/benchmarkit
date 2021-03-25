@@ -9,11 +9,11 @@ class ExecuteScriptWorker
     @script = Script.find_by_id(@metric.script_id)
     result = @metric.execute_metric
     if result.real > 0
-      @script.executed do
+      @script.executed! do
         @script.update_description("Executed Successfully")
       end
     else
-      @script.failed_execution do
+      @script.failed_execution! do
         @script.update_description("Execution Failed")
       end
     end

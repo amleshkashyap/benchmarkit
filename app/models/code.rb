@@ -6,6 +6,8 @@ class Code < ApplicationRecord
   RESTRICTED_KEYWORDS = []
   VALID_STATUSES = ['stored', 'sanitized', 'validated', 'invalid']
 
+  validates :status, inclusion: { in: VALID_STATUSES }
+
   aasm column: 'status', whiny_transitions: false do
     state :stored, initial: true
     state :sanitized
@@ -13,11 +15,11 @@ class Code < ApplicationRecord
     state :invalid
 
     event :sanitization do
-      transitions from: [:stored], to: :sanitized, guards: [:sanitize_it?, :sanitize_snippet]
+      transitions from: [:stored], to: :sanitized, guards: [:sanitize_it?, :is_sanitized_snippet?]
     end
 
     event :validation do
-      transitions from: [:sanitized], to: :validated, guards: [:validate_it?, :validate_snippet]
+      transitions from: [:sanitized], to: :validated, guards: [:validate_it?, :is_valid_snippet?]
     end
   end
 
@@ -26,7 +28,7 @@ class Code < ApplicationRecord
     self.stored?
   end
 
-  def sanitize_snippet
+  def is_sanitized_snippet?
     RESTRICTED_KEYWORDS.each { |word|
       return false if self.snippet.includes(word)
     }
@@ -54,7 +56,7 @@ class Code < ApplicationRecord
     self.sanitized?
   end
 
-  def validate_snippet(result)
+  def is_valid_snippet?(result)
     ex = instance_eval self.snippet
     puts "**VALIDATION STARTS **"
     puts ex

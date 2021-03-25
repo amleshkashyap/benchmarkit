@@ -81,7 +81,7 @@ class V1::Api::ApiScriptsController < ApplicationController
       user_result = params[:result] || nil
       # add validations for user results, ie, integer, boolean, string only
       user_iterations = params[:iters] || DEFAULT_ITERATIONS
-      @script.resubmitted do
+      @script.resubmitted! do
         @script.update_description("Uploaded New File Successfully")
       end
       if @script.save
