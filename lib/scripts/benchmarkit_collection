@@ -9,7 +9,13 @@
 			"name": "Submit A Fresh Script For Execution",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "__profilin=p%3Dt; rack.session=BAh7B0kiD3Nlc3Npb25faWQGOgZFVG86HVJhY2s6OlNlc3Npb246OlNlc3Npb25JZAY6D0BwdWJsaWNfaWRJIkVjNDcyYTZhNzhlNWJkMjQ3NWU0NzE4ODE5ZjgwZTc2NWI5YjIzMzBiMjliNWU0MzBlMWNiNmU3NzRhNGQyNzg2BjsARkkiCWNzcmYGOwBUSSIxRUE2bXprWHluMVJSNVRsL1hOK043N3F1djl2azZnYlpHNHlocElwT2hLbz0GOwBU--4fdbca559707f6407500b722753e13b1b5c2f76b; _benchmarkit_session=%2BaphBb53XGrw%2F20CVYlN3leZ5LKLOUPdnTrS2cmRON8orp5AePAb2D5k39pBGlN4r3C96lCU5p2fQ%2F7HTKrthoq8%2FT5vPYSRCEi52l8%2ByMGsnUYIkJjEjwy%2F4fGI3n7RCQhpap6DkzQplHcySA6b94nJ0iTAZ6FhL2puxLLhLjGhkebSL%2FBzeki10LV0LcQC64yDe8xsmIih5g6u%2BN%2FkU2kovl9i0zZEeKFHlncdbhULc%2F0dnX1OTSeuLHHiasG4I6S3AFFiuHc%2BvyybdTdS5UJ1nH1ggcbGtEW%2Fj%2FC7pfA8nIz6ZSnzqgdv3JZG7tO8eLbloq2lE5ypI%2FbocVedtnrGWV6zGQ1TI2as2cy7KOrA7Rs9j9Lttcj16w7sRPX0AqZq0QAlJtKnhZat--ukfD9Zn0G0g22%2BJD--wh%2BPDnP2foS7gTY%2FDdhM1w%3D%3D",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "formdata",
 					"formdata": [
@@ -51,7 +57,7 @@
 					]
 				},
 				"url": {
-					"raw": "localhost:3000/v1/api/scripts",
+					"raw": "localhost:3000/v1/api/script",
 					"host": [
 						"localhost"
 					],
@@ -59,7 +65,7 @@
 					"path": [
 						"v1",
 						"api",
-						"scripts"
+						"script"
 					]
 				}
 			},
@@ -78,7 +84,7 @@
 					}
 				],
 				"url": {
-					"raw": "localhost:3000/v1/api/scripts?id=27",
+					"raw": "localhost:3000/v1/api/script?name=MoreClasses26",
 					"host": [
 						"localhost"
 					],
@@ -86,12 +92,17 @@
 					"path": [
 						"v1",
 						"api",
-						"scripts"
+						"script"
 					],
 					"query": [
 						{
 							"key": "id",
-							"value": "27"
+							"value": "30",
+							"disabled": true
+						},
+						{
+							"key": "name",
+							"value": "MoreClasses26"
 						}
 					]
 				}
@@ -108,7 +119,7 @@
 					"formdata": [
 						{
 							"key": "id",
-							"value": "27",
+							"value": "29",
 							"type": "text"
 						},
 						{
@@ -129,7 +140,7 @@
 					]
 				},
 				"url": {
-					"raw": "localhost:3000/v1/api/scripts",
+					"raw": "localhost:3000/v1/api/script",
 					"host": [
 						"localhost"
 					],
@@ -137,7 +148,7 @@
 					"path": [
 						"v1",
 						"api",
-						"scripts"
+						"script"
 					],
 					"query": [
 						{
@@ -166,12 +177,12 @@
 			"response": []
 		},
 		{
-			"name": "Rerun The Script, Supply Iterations",
+			"name": "Get all scripts for user",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:3000/v1/api/scripts/rerun?id=14",
+					"raw": "localhost:3000/v1/api/scripts?status=enqueued",
 					"host": [
 						"localhost"
 					],
@@ -179,7 +190,33 @@
 					"path": [
 						"v1",
 						"api",
-						"scripts",
+						"scripts"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "enqueued"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Rerun The Script, Supply Iterations",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/v1/api/script/rerun?id=14",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"script",
 						"rerun"
 					],
 					"query": [
@@ -193,12 +230,12 @@
 			"response": []
 		},
 		{
-			"name": "Rerun A Code, Not Script",
+			"name": "Revalidate The Last Submission With New Result",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:3000/v1/api/scripts/reruncode?id=9",
+					"raw": "localhost:3000/v1/api/script/revalidate?id=29&result=true&iters=1000",
 					"host": [
 						"localhost"
 					],
@@ -206,13 +243,21 @@
 					"path": [
 						"v1",
 						"api",
-						"scripts",
-						"reruncode"
+						"script",
+						"revalidate"
 					],
 					"query": [
 						{
 							"key": "id",
-							"value": "9"
+							"value": "29"
+						},
+						{
+							"key": "result",
+							"value": "true"
+						},
+						{
+							"key": "iters",
+							"value": "1000"
 						}
 					]
 				}
@@ -225,7 +270,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:3000/v1/api/metric?id=3",
+					"raw": "localhost:3000/v1/api/script/metric?id=3",
 					"host": [
 						"localhost"
 					],
@@ -233,6 +278,7 @@
 					"path": [
 						"v1",
 						"api",
+						"script",
 						"metric"
 					],
 					"query": [
@@ -246,12 +292,12 @@
 			"response": []
 		},
 		{
-			"name": "Revalidate The Last Submission With New Result",
+			"name": "Get All Metrics For The Script",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:3000/v1/api/scripts/revalidate?id=27&result=true&iters=1000",
+					"raw": "localhost:3000/v1/api/script/metrics?id=16",
 					"host": [
 						"localhost"
 					],
@@ -259,21 +305,244 @@
 					"path": [
 						"v1",
 						"api",
-						"scripts",
-						"revalidate"
+						"script",
+						"metrics"
 					],
 					"query": [
 						{
 							"key": "id",
-							"value": "27"
+							"value": "16"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Private Code Details",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/v1/api/script/code",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"script",
+						"code"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Metrics For Private Code",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/v1/api/script/code/metrics",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"script",
+						"code",
+						"metrics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Rerun A Code For Script And Make It Public",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/v1/api/script/code/rerun?id=9",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"script",
+						"code",
+						"rerun"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "9"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Codes For Script",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/v1/api/script/codes",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"script",
+						"codes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create/Check User Object",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/v1/api/myobject?id=3",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"myobject"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add User Method To The Object",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "__profilin=p%3Dt; _benchmarkit_session=RServZNA8kv29K2b7dMY%2Ba0x%2F9Ooo4ZYmrZGph1OL%2BxJVpHB3g8%2BkX6FZ%2FHgVXSo3ykelAk0YUdqxRl5zh5G7NMoyqJxs3OHAiFxUyRwf29AeKOcWhf%2B1jqEw%2BpPCQzBVNjuKJuboFHKPe17ggE54kYCP55lgX1eTys0ZSxo%2FJrdvq01y4B57aXtsn30r2q%2BfJPNGFnNoOkA7BswlWfMI%2B%2Fcs9H3224TY0CPqi68MTfoPuhU2W9MB1zx402rW%2F%2B2FGh8eMegdKMA30MBZfhXnVXpI9ui1T0bF0g6EBuNWYTvq7B9ig3%2FmsEmytQURS4gVGQ2r2MpXXJnRjg71d%2BXOkMdPNnAUpScEjFwYAeCbXmolGvlX%2FuSI6jaHazcH849Edj9NxyYMxacRxx7--64f9oMZr2nIrtSZl--dNEoOFb8wF2z%2F4L8r6rF7g%3D%3D",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "id",
+							"value": "3",
+							"type": "text",
+							"disabled": true
 						},
 						{
-							"key": "result",
-							"value": "true"
+							"key": "name",
+							"value": "first_method",
+							"type": "text"
 						},
 						{
-							"key": "iters",
-							"value": "1000"
+							"key": "textfile",
+							"type": "file",
+							"src": "moreclasses.rb"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:3000/v1/api/myobject/method",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"myobject",
+						"method"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List User Methods On Object",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "__profilin=p%3Dt; _benchmarkit_session=RServZNA8kv29K2b7dMY%2Ba0x%2F9Ooo4ZYmrZGph1OL%2BxJVpHB3g8%2BkX6FZ%2FHgVXSo3ykelAk0YUdqxRl5zh5G7NMoyqJxs3OHAiFxUyRwf29AeKOcWhf%2B1jqEw%2BpPCQzBVNjuKJuboFHKPe17ggE54kYCP55lgX1eTys0ZSxo%2FJrdvq01y4B57aXtsn30r2q%2BfJPNGFnNoOkA7BswlWfMI%2B%2Fcs9H3224TY0CPqi68MTfoPuhU2W9MB1zx402rW%2F%2B2FGh8eMegdKMA30MBZfhXnVXpI9ui1T0bF0g6EBuNWYTvq7B9ig3%2FmsEmytQURS4gVGQ2r2MpXXJnRjg71d%2BXOkMdPNnAUpScEjFwYAeCbXmolGvlX%2FuSI6jaHazcH849Edj9NxyYMxacRxx7--64f9oMZr2nIrtSZl--dNEoOFb8wF2z%2F4L8r6rF7g%3D%3D",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:3000/v1/api/myobject/methods",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"myobject",
+						"methods"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "3",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Execute User Method",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/v1/api/myobject/run?id=3&name=first_method",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"api",
+						"myobject",
+						"run"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "3"
+						},
+						{
+							"key": "name",
+							"value": "first_method"
 						}
 					]
 				}
@@ -300,128 +569,6 @@
 						{
 							"key": "set",
 							"value": "dead"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create User Object",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "localhost:3000/v1/api/userobject?id=3",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"v1",
-						"api",
-						"userobject"
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "3"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "List User Methods On Object",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "localhost:3000/v1/api/usermethod?id=3",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"v1",
-						"api",
-						"usermethod"
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "3"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Add User Method To The Object",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "id",
-							"value": "3",
-							"type": "text"
-						},
-						{
-							"key": "name",
-							"value": "first_method",
-							"type": "text"
-						},
-						{
-							"key": "textfile",
-							"type": "file",
-							"src": "moreclasses.rb"
-						}
-					]
-				},
-				"url": {
-					"raw": "localhost:3000/v1/api/usermethod",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"v1",
-						"api",
-						"usermethod"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Execute User Method",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "localhost:3000/v1/api/runmethod?id=3&name=first_method",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"v1",
-						"api",
-						"runmethod"
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "3"
-						},
-						{
-							"key": "name",
-							"value": "first_method"
 						}
 					]
 				}
