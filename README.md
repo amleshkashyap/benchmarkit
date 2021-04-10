@@ -42,3 +42,4 @@
     13. https://guides.rubyonrails.org/api_app.html - create/change existing to API only rails application
     14. https://www.sitepoint.com/devise-authentication-in-depth/ - using devise for auth
     15. https://guides.railsgirls.com/devise - devise basics
+    16. https://edgeguides.rubyonrails.org/debugging_rails_applications.html - various debuggin options, including a small byebug tutorial

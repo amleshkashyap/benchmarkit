@@ -23,7 +23,6 @@ Rails.application.routes.draw do
       get "/script/code/metrics" => 'api_scripts#list_metrics_for_private_code'
       get "/script/code/rerun" => 'api_scripts#rerun_script_code_and_share'
       get "/script/codes" => 'api_scripts#list_codes_for_script'
-      
 
       # APis for public codes
       get "/code" => 'api_scripts#get_public_code'

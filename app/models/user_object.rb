@@ -49,8 +49,10 @@ class UserObject < ApplicationRecord
     if !@all_methods.nil?
       valid_till = Util.redis_get_from_hash(self.get_redis_expiry_key, name)
       if self.validity_expired?(valid_till)
-	Util.redis_remove_key_from_hash(self.get_redis_expiry_key, name)
-	Util.redis_remove_key_from_hash(self.get_redis_key, name)
+        Util.redis.multi do
+          Util.redis_remove_key_from_hash(self.get_redis_expiry_key, name)
+          Util.redis_remove_key_from_hash(self.get_redis_key, name)
+        end
       else
         return true if @all_methods.include?(name)
       end
@@ -76,8 +78,10 @@ class UserObject < ApplicationRecord
 
   # Don't use this method without doing method_exists? first - if it gives false, add the method
   def add_method(name, snippet)
-    Util.redis_add_to_hash(self.get_redis_key, name, snippet)
-    Util.redis_add_to_hash(self.get_redis_expiry_key, name, (Time.current.utc + DEFAULT_REDIS_EXPIRY).to_i)
+    Util.redis.multi do
+      Util.redis_add_to_hash(self.get_redis_key, name, snippet)
+      Util.redis_add_to_hash(self.get_redis_expiry_key, name, (Time.current.utc + DEFAULT_REDIS_EXPIRY).to_i)
+    end
   end
 
   def extend_method_expiry(name)
