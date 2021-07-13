@@ -1,8 +1,5 @@
-require 'byebug'
-
 class Item
   attr_reader :item_name, :quantity, :supplier_name, :price
-  byebug
   def initialize(item_name, quantity, supplier_name, price)
     @item_name = item_name
     @quantity = quantity

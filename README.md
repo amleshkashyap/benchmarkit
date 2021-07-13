@@ -1,4 +1,18 @@
-# Benchmark Scripts/Snippets
+### Setup
+  * Node - version 12.7 or higher preferred
+  * Ruby - 3.0
+  * Do a bundle install for gems and appropriate rails to be setup
+    - might have to delete Gemfile.lock
+  * If public/packs/manifest.json isn't present, just run yarn (hopefully won't throw an error with node 1[2-4].[7-12]).
+  * Run with "rails s"
+  * Go to browser and visit localhost:3000
+  * Sign up - a confirmation link should appear on the console (where "rails s" was done)
+    - if doesn't show up, send confirmation link again a few times
+  * Login and start using the Postman collection provided in lib/scripts/benchmarkit\_collection - after entering the Cookies fetched from Headers of inspecting any
+    API call from the browser.
+
+
+### Description
   * Summary - 
     1. Submit a script for execution and benchmarking
     2. If the script fails some checks, it can be resubmitted multiple number of times
