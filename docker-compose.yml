@@ -1,0 +1,39 @@
+version: "3"
+services:
+  redis:
+    image: redis:5.0-alpine
+    hostname: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - benchmarkit-redis:/var/lib/redis/data
+  benchmarkit:
+    build:
+      context: .
+      args:
+        USER_ID: "${USER_ID-1000}"
+        GROUP_ID: "${GROUP_ID-1000}"
+#    volumes:
+#      - ./benchmarkit:/opt/app
+    links:
+      - redis
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+  sidekiq:
+    build:
+      context: .
+      args:
+        USER_ID: "${USER_ID-1000}"
+        GROUP_ID: "${GROUP_ID-1000}"
+    command: bundle exec sidekiq -C config/sidekiq.yml
+#    volumes:
+#      - ./benchmarkit:/opt/app
+    links:
+      - redis
+      - benchmarkit
+    env_file:
+      - .env
+volumes:
+  benchmarkit-redis:

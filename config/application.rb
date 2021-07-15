@@ -14,8 +14,8 @@ module Benchmarkit
     config.autoload_paths += %W( #{config.root}/lib );
     config.eager_load_paths += %W( #{config.root}/lib );
 
-    config.redis = Redis::Namespace.new("benchmarkit", :redis => Redis.new);
-    config.cache_store = :redis_store, "redis://localhost:6379/0/cache", { expires_in: 90.minutes };
+    config.redis = Redis::Namespace.new("benchmarkit", :redis => Redis.new(host: ENV["REDIS_HOST"], port: ENV["REDIS_PORT"], db: 2));
+    config.cache_store = :redis_store, ENV["CACHE_URL"], { expires_in: 90.minutes };
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

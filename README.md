@@ -14,12 +14,46 @@
   * Login and start using the Postman collection provided in lib/scripts/benchmarkit\_collection - after entering the Cookies fetched from Headers of inspecting any
     API call from the browser.
 
-#### Dockerize
+#### Dockerize and Run Locally
   * Tutorial - https://semaphoreci.com/community/tutorials/dockerizing-a-ruby-on-rails-application
     - It uses Unicorn server (with/without nginx), cache and sidekiq configured to use Redis, PostgresSQL, assumes no existing application
-    - Ignore 80% of the post for an existing application with different setup than above.
-  * 
+    - It configures sidekiq to use specific redis url via an initializer file, but we can do that even via an ENV variable (REDIS\_PROVIDER)
+    - Ignore 70% of the post for an existing application with different setup than above.
+  * For this application -
+    - Rails, Puma and Sidekiq - they're installed via the bundle install.
+    - Ruby, Redis, Node need to be installed via dockerfile. Somehow sqlite3 is also installed (accessible via rails console inside "docker exec -it ....").
+    - Redis and Sidekiq need to be started too
+  * For any new application with different setup, Dockerfile needs to have all the installation instructions.
+  * Image created is around 80GB on my local (adding redis added 40 extra GB's) - probably due to the required dependencies.
+    - Copying files from `/etc/skel' .. - Till this step (5), 850 MB
+    - Setting up redis-tools (5:5.0.3-4+deb10u3) ... - Till this step (8), 39.9 GB
+  * Couldn't get the redis and sidekiq running inside the container without manually logging in
+    - using docker-compose.yml for now
+  * Once image is created, can run it via \<docker run -p 3000:3000 \<image\_name\>:\<tag\>\>
+    - adjust the ports according to your wishes
+    - if need to install/edit something inside the container, go to the container as root \<bundle exec -u 0 -it <container_name> /bin/bash"\>
+  * With the above manually building of docker image, we need to login and start redis and sidekiq for things to work correctly. Also, image size is around 80GB.
+  * Go to the browser and visit localhost:3000 (based on the port mappings done above).
+  * Get the cookies as described for local setup, run the APIs, etc.
+    - Can check - GET "localhost:3000/v1/api/myobject/methods" fails without Redis
+    - Can check - POST "localhost:3000/v1/api/script" fails without sidekiq running (if Redis isn't running, throws that error first)
+    - After doing the above POST call, ensure that the job doesn't go to Retry - "localhost:3000/sidekiq" - since redis, sidekiq are started on the container, it
+      shouldn't happen - should work like normal local setup. Everytime container is restarted, redis/sidekiq need to be restarted too.
 
+#### Docker-Compose and Run Locally
+  * Can use docker-compose to simplify things a bit -
+    - since we've 3 services, the application itself, redis and sidekiq, list them in the YAML file
+    - Careful to use the "version" key at the top of YAML file (docker-compose.yml)
+    - use .env file to setup redis URL's at runtime
+  * For some reason, the image size is down to 1.4 GB for the application (and another 1.4 GB for sidekiq version created by compose, 30 MB for Redis) 
+  * It's much easier to manage everything - 
+    - Need to change the code and rebuild the image (note: existing image must be rebuilt after code change, or try out something new by getting into the image as
+      mentioned above using docker exec) - "docker-compose build" (it caches everything so changing paths in the YAML/code is risky => use --no-cache).
+    - Need to stop and delete all associated containers - "docker-compose down"
+    - Need to create/start associated containers - "docker-compose up"
+  * Once the containers are built and running, follow the same way of getting/adding cookies and making API calls accordingly. Verify redis/sidekiq.
+  * With sqlite3, which is built-in in that application, can't find a way to access same DB in sidekiq that's being used in benchmarkit.
+    - so no sidekiq processing works.
 
 ### Description
   * Summary - 
