@@ -1,15 +1,24 @@
-### Setup
+### Setup, Deployment
+#### Local Machine
   * Node - version 12.7 or higher preferred
-  * Ruby - 3.0
+  * Ruby - 3.0.0
+  * DB - sqlite3
+  * Gemfile - has puma server (single mode - https://github.com/puma/puma/blob/master/docs/deployment.md)
   * Do a bundle install for gems and appropriate rails to be setup
     - might have to delete Gemfile.lock
   * If public/packs/manifest.json isn't present, just run yarn (hopefully won't throw an error with node 1[2-4].[7-12]).
-  * Run with "rails s"
+  * Run with "rails s" (check logs for what server it's using)
   * Go to browser and visit localhost:3000
   * Sign up - a confirmation link should appear on the console (where "rails s" was done)
     - if doesn't show up, send confirmation link again a few times
   * Login and start using the Postman collection provided in lib/scripts/benchmarkit\_collection - after entering the Cookies fetched from Headers of inspecting any
     API call from the browser.
+
+#### Dockerize
+  * Tutorial - https://semaphoreci.com/community/tutorials/dockerizing-a-ruby-on-rails-application
+    - It uses Unicorn server (with/without nginx), cache and sidekiq configured to use Redis, PostgresSQL, assumes no existing application
+    - Ignore 80% of the post for an existing application with different setup than above.
+  * 
 
 
 ### Description
