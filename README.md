@@ -25,14 +25,14 @@
     - Redis and Sidekiq need to be started too
   * For any new application with different setup, Dockerfile needs to have all the installation instructions.
   * Image created is around 80GB on my local (adding redis added 40 extra GB's) - probably due to the required dependencies.
-    - Copying files from `/etc/skel' .. - Till this step (5), 850 MB
+    - Copying files from '/etc/skel' .. - Till this step (5), 850 MB
     - Setting up redis-tools (5:5.0.3-4+deb10u3) ... - Till this step (8), 39.9 GB
     - After doing docker-compose based setup, now Dockerfile based setup is only 1.4 GB - unsure how?
   * Couldn't get the redis and sidekiq running inside the container without manually logging in
-    - use ENTRYPOINT along with an init script which stops at puma start (see init_docker.sh).
+    - use ENTRYPOINT along with an init script which stops at puma start (see init\_docker.sh).
   * Once image is created, can run it via \<docker run -p 3000:3000 \<image\_name\>:\<tag\>\>
     - adjust the ports according to your wishes
-    - if need to install/edit something inside the container, go to the container as root \<bundle exec -u 0 -it <container_name> /bin/bash"\>
+    - if need to install/edit something inside the container, go to the container as root \<bundle exec -u 0 -it \<container\_name\> /bin/bash"\>
   * Go to the browser and visit localhost:3000 (based on the port mappings done above).
   * Get the cookies as described for local setup, run the APIs, etc.
     - Can check - GET "localhost:3000/v1/api/myobject/methods" fails without Redis
