@@ -29,4 +29,4 @@ RUN chown -R user:user /opt/dockerapps/app
 
 USER $USER_ID
 # since we're using puma server by default
-CMD bundle exec puma
+ENTRYPOINT ["/bin/bash", "init_docker.sh"]
