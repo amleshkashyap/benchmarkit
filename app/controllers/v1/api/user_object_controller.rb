@@ -1,4 +1,4 @@
-class V1::Api::ApiUserObjectsController < ApiController
+class V1::Api::UserObjectController < ApiController
 
   skip_before_action :verify_authenticity_token
 
