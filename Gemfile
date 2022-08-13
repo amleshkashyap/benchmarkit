@@ -22,9 +22,12 @@ gem 'devise'
 # Use Redis adapter to run Action Cable in production
 gem 'redis', '~> 4.0'
 gem 'redis-namespace'
-gem 'sidekiq'
+gem 'sidekiq', '>= 6.4'
 gem 'aasm'
-gem 'apipie-rails'
+gem 'apipie-rails', '>= 0.8.1'
+gem 'ruby-prof'
+gem 'rails-perftest'
+gem 'rexml'
 # Use Active Model has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

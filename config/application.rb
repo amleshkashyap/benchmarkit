@@ -16,6 +16,7 @@ module Benchmarkit
 
     config.redis = Redis::Namespace.new("benchmarkit", :redis => Redis.new(host: ENV["REDIS_HOST"], port: ENV["REDIS_PORT"], db: 2));
     config.cache_store = :redis_store, ENV["CACHE_URL"], { expires_in: 90.minutes };
+    config.middleware.use Rack::RubyProf, :path => './tmp/profile'
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

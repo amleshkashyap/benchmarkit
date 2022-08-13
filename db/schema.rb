@@ -77,8 +77,8 @@ ActiveRecord::Schema.define(version: 2021_03_26_155914) do
     t.string "language"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.integer "user_id"
     t.string "status"
+    t.integer "user_id"
     t.integer "latest_code_id"
     t.integer "latest_metric_id"
     t.string "last_jid"
